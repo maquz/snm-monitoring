@@ -1,0 +1,617 @@
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0
+  }
+
+  body {
+    font-family: var(--font-sans)
+  }
+
+  .shell {
+    background: var(--color-background-primary);
+    border-radius: var(--border-radius-lg);
+    border: 0.5px solid var(--color-border-tertiary);
+    overflow: hidden;
+    max-width: 400px;
+    margin: 0 auto
+  }
+
+  .topbar {
+    background: #0F6E56;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px
+  }
+
+  .topbar-title {
+    color: #E1F5EE;
+    font-size: 15px;
+    font-weight: 500
+  }
+
+  .topbar-sub {
+    color: #9FE1CB;
+    font-size: 12px
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: #5DCAA5;
+    transition: width 0.4s ease
+  }
+
+  .progress-track {
+    height: 3px;
+    background: #0F6E56
+  }
+
+  .step-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 10px 16px;
+    background: #085041
+  }
+
+  .dot {
+    height: 6px;
+    border-radius: 3px;
+    background: #1D9E75;
+    transition: all 0.3s;
+    flex: 1
+  }
+
+  .dot.active {
+    background: #9FE1CB
+  }
+
+  .dot.done {
+    background: #5DCAA5
+  }
+
+  .step-label {
+    color: #9FE1CB;
+    font-size: 11px;
+    padding: 0 16px 10px;
+    background: #085041;
+    text-transform: uppercase;
+    letter-spacing: 0.05em
+  }
+
+  .content {
+    padding: 16px
+  }
+
+  .field-group {
+    margin-bottom: 14px
+  }
+
+  .field-label {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em
+  }
+
+  .field-input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    font-size: 14px;
+    background: var(--color-background-primary);
+    color: var(--color-text-primary)
+  }
+
+  .field-input:focus {
+    outline: none;
+    border-color: #1D9E75
+  }
+
+  .row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px
+  }
+
+  .rating-block {
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-md);
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 0.5px solid var(--color-border-tertiary)
+  }
+
+  .rating-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-bottom: 6px;
+    line-height: 1.3
+  }
+
+  .rating-desc {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    margin-bottom: 8px
+  }
+
+  .stars {
+    display: flex;
+    gap: 6px
+  }
+
+  .star {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    background: var(--color-background-primary);
+    color: var(--color-text-secondary);
+    transition: all 0.15s;
+    user-select: none;
+    flex: 1
+  }
+
+  .star:hover {
+    border-color: #1D9E75;
+    color: #1D9E75
+  }
+
+  .star.sel {
+    background: #1D9E75;
+    color: #fff;
+    border-color: #1D9E75
+  }
+
+  .star.sel-low {
+    background: #E24B4A;
+    color: #fff;
+    border-color: #E24B4A
+  }
+
+  .star.sel-mid {
+    background: #EF9F27;
+    color: #fff;
+    border-color: #EF9F27
+  }
+
+  .nav {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 0.5px solid var(--color-border-tertiary)
+  }
+
+  .btn-back {
+    flex: 1;
+    padding: 11px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-primary);
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    cursor: pointer
+  }
+
+  .btn-next {
+    flex: 2;
+    padding: 11px;
+    border: none;
+    border-radius: var(--border-radius-md);
+    background: #0F6E56;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer
+  }
+
+  .btn-next:hover {
+    background: #085041
+  }
+
+  .score-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px
+  }
+
+  .score-card {
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-md);
+    padding: 10px;
+    text-align: center
+  }
+
+  .score-card-val {
+    font-size: 22px;
+    font-weight: 500;
+    color: #0F6E56
+  }
+
+  .score-card-label {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    margin-top: 2px
+  }
+
+  .grade-badge {
+    text-align: center;
+    padding: 14px;
+    background: #EAF3DE;
+    border-radius: var(--border-radius-md);
+    margin-bottom: 12px
+  }
+
+  .grade-val {
+    font-size: 32px;
+    font-weight: 500;
+    color: #27500A
+  }
+
+  .grade-label {
+    font-size: 13px;
+    color: #3B6D11;
+    margin-top: 2px
+  }
+
+  .comments-area {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px 12px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    font-size: 14px;
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    resize: none;
+    font-family: var(--font-sans)
+  }
+
+  .submitted {
+    text-align: center;
+    padding: 24px 16px
+  }
+
+  .check-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #EAF3DE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 24px;
+    color: #0F6E56
+  }
+
+  .sub-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-bottom: 6px
+  }
+
+  .sub-sub {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.5
+  }
+
+  .new-btn {
+    margin-top: 16px;
+    padding: 11px 24px;
+    background: #0F6E56;
+    color: #fff;
+    border: none;
+    border-radius: var(--border-radius-md);
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%
+  }
+</style>
+
+<div class="shell">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Lesson Observation</div>
+      <div class="topbar-sub">Ghana Education Service · Tema Metro</div>
+    </div>
+  </div>
+  <div class="progress-track">
+    <div class="progress-bar" id="pbar" style="width:14%"></div>
+  </div>
+  <div class="step-indicator" id="dots"></div>
+  <div class="step-label" id="slabel">Step 1 of 7 — Basic Info</div>
+  <div id="form-body"></div>
+</div>
+
+<script>
+  const steps = [
+    { label: "Basic Info", render: renderBasic },
+    { label: "Planning & Preparation (A)", render: renderA },
+    { label: "Instructional Skills (B)", render: renderB },
+    { label: "Class Management (C)", render: renderC },
+    { label: "Assessment (D)", render: renderD },
+    { label: "Comments", render: renderComments },
+    { label: "Review & Submit", render: renderReview }
+  ];
+
+  const state = {
+    step: 0,
+    school: "", teacher: "", sex: "", subject: "", cls: "", roll: "", date: "", start: "", end: "",
+    A: { plan_align: 0, indicators: 0, rpk: 0 },
+    B: { intro: 0, clarity: 0, strategy: 0, motivation: 0, structure: 0, mastery: 0, questioning: 0, gender: 0, tlr: 0, critical: 0, involvement: 0 },
+    C: { rapport: 0, appearance: 0, output: 0, environment: 0 },
+    D: { evaluation: 0, time_mgmt: 0 },
+    comments: "", areas: ""
+  };
+
+  function score(obj) { return Object.values(obj).reduce((a, b) => a + b, 0) }
+  function maxA() { return 15 } function maxB() { return 55 } function maxC() { return 20 } function maxD() { return 10 }
+  function totalScore() { return score(state.A) + score(state.B) + score(state.C) + score(state.D) }
+  function grade(s) {
+    const pct = s / 100 * 100;
+    if (pct >= 80) return { g: "Excellent", c: "#27500A", bg: "#EAF3DE" };
+    if (pct >= 65) return { g: "Very Good", c: "#444441", bg: "#E1F5EE" };
+    if (pct >= 50) return { g: "Good", c: "#633806", bg: "#FAEEDA" };
+    return { g: "Needs Improvement", c: "#A32D2D", bg: "#FCEBEB" };
+  }
+
+  function renderDots() {
+    const d = document.getElementById("dots");
+    d.innerHTML = steps.map((_, i) => `<div class="dot ${i < state.step ? "done" : i === state.step ? "active" : ""}"></div>`).join("");
+    document.getElementById("slabel").textContent = `Step ${state.step + 1} of ${steps.length} — ${steps[state.step].label}`;
+    document.getElementById("pbar").style.width = `${Math.round((state.step + 1) / steps.length * 100)}%`;
+  }
+
+  function ratingBlock(key, subkey, title, desc, max) {
+    const val = state[key][subkey] || 0;
+    const labels = ["Poor", "Fair", "Good", "V. Good", "Excellent"];
+    const labels3 = ["Below", "Avg", "Above"];
+    const useLabels = max === 3 ? labels3 : labels;
+    const stars = Array.from({ length: max }, (_, i) => {
+      const n = i + 1;
+      let cls = "star";
+      if (n <= val) {
+        if (val <= Math.ceil(max * 0.35)) cls += " sel-low";
+        else if (val <= Math.ceil(max * 0.65)) cls += " sel-mid";
+        else cls += " sel";
+      }
+      return `<div class="star ${n <= val ? (val <= 1 && max >= 3 ? "sel-low" : val <= 2 && max >= 4 ? "sel-mid" : "sel") : ""}" onclick="setRating('${key}','${subkey}',${n})">${n}</div>`;
+    }).join("");
+    return `<div class="rating-block">
+    <div class="rating-title">${title}</div>
+    ${desc ? `<div class="rating-desc">${desc}</div>` : ""}
+    <div class="stars">${stars}</div>
+  </div>`;
+  }
+
+  function setRating(key, subkey, val) {
+    state[key][subkey] = val;
+    steps[state.step].render();
+  }
+
+  function navButtons(backLabel = "Back", nextLabel = "Next") {
+    return `<div class="nav">
+    ${state.step > 0 ? `<button class="btn-back" onclick="goBack()">${backLabel}</button>` : ""}
+    <button class="btn-next" onclick="goNext()">${nextLabel}</button>
+  </div>`;
+  }
+
+  function renderBasic() {
+    renderDots();
+    document.getElementById("form-body").innerHTML = `
+    <div class="content">
+      <div class="field-group">
+        <div class="field-label">School Name</div>
+        <input class="field-input" id="f-school" value="${state.school}" placeholder="e.g. Community 8 no.3 Primary School" oninput="state.school=this.value">
+      </div>
+      <div class="row2">
+        <div class="field-group">
+          <div class="field-label">Teacher Name</div>
+          <input class="field-input" id="f-teacher" value="${state.teacher}" placeholder="Full name" oninput="state.teacher=this.value">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Sex</div>
+          <select class="field-input" onchange="state.sex=this.value">
+            <option value="">Select</option>
+            <option ${state.sex === "Male" ? "selected" : ""}>Male</option>
+            <option ${state.sex === "Female" ? "selected" : ""}>Female</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field-group">
+          <div class="field-label">Subject</div>
+          <input class="field-input" value="${state.subject}" placeholder="e.g. Mathematics" oninput="state.subject=this.value">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Class</div>
+          <input class="field-input" value="${state.cls}" placeholder="e.g. JHS 2A" oninput="state.cls=this.value">
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field-label">No. on Roll</div>
+        <input class="field-input" type="number" value="${state.roll}" placeholder="0" oninput="state.roll=this.value">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Date</div>
+        <input class="field-input" type="date" value="${state.date}" onchange="state.date=this.value">
+      </div>
+      <div class="row2">
+        <div class="field-group">
+          <div class="field-label">Start Time</div>
+          <input class="field-input" type="time" value="${state.start}" onchange="state.start=this.value">
+        </div>
+        <div class="field-group">
+          <div class="field-label">End Time</div>
+          <input class="field-input" type="time" value="${state.end}" onchange="state.end=this.value">
+        </div>
+      </div>
+    </div>
+    ${navButtons("", "Next →")}`;
+  }
+
+  function renderA() {
+    renderDots();
+    document.getElementById("form-body").innerHTML = `
+    <div class="content">
+      ${ratingBlock("A", "plan_align", "Lesson plan aligns with curriculum", "Does the lesson plan reflect the curriculum standards?", 5)}
+      ${ratingBlock("A", "indicators", "Indicators/objectives clearly stated", "Are learning indicators well-defined in the plan?", 5)}
+      ${ratingBlock("A", "rpk", "RPK adequately considered", "Is prior knowledge (RPK) incorporated?", 5)}
+      <div style="background:var(--color-background-secondary);padding:10px 12px;border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-secondary)">
+        Section A score: <strong style="color:#0F6E56">${score(state.A)} / 15</strong>
+      </div>
+    </div>
+    ${navButtons()}`;
+  }
+
+  function renderB() {
+    renderDots();
+    document.getElementById("form-body").innerHTML = `
+    <div class="content">
+      ${ratingBlock("B", "intro", "Child-centred introduction", "Lesson starts with learner engagement", 5)}
+      ${ratingBlock("B", "clarity", "Clarity of instruction", "Instructions are clear and understandable", 5)}
+      ${ratingBlock("B", "strategy", "Teaching strategies used", "Variety of strategies appropriate to topic", 5)}
+      ${ratingBlock("B", "motivation", "Learner motivation", "Students are engaged and motivated", 5)}
+      ${ratingBlock("B", "structure", "Lesson structure & pacing", "Logical flow from intro to close", 5)}
+      ${ratingBlock("B", "mastery", "Subject mastery", "Teacher demonstrates content knowledge", 5)}
+      ${ratingBlock("B", "questioning", "Questioning skills", "Questions promote higher-order thinking", 5)}
+      ${ratingBlock("B", "gender", "Gender balance", "Equal participation across genders", 5)}
+      ${ratingBlock("B", "tlr", "Use of TLRs", "Teaching/learning resources used effectively", 5)}
+      ${ratingBlock("B", "critical", "Critical thinking promoted", "Students encouraged to analyse and evaluate", 5)}
+      ${ratingBlock("B", "involvement", "Learner involvement", "All learners actively participate", 5)}
+      <div style="background:var(--color-background-secondary);padding:10px 12px;border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-secondary)">
+        Section B score: <strong style="color:#0F6E56">${score(state.B)} / 55</strong>
+      </div>
+    </div>
+    ${navButtons()}`;
+  }
+
+  function renderC() {
+    renderDots();
+    document.getElementById("form-body").innerHTML = `
+    <div class="content">
+      ${ratingBlock("C", "rapport", "Rapport with learners", "Positive, respectful relationship with students", 5)}
+      ${ratingBlock("C", "appearance", "Facilitator appearance", "Professional and appropriate presentation", 5)}
+      ${ratingBlock("C", "output", "Learner output", "Quality and quantity of student work produced", 5)}
+      ${ratingBlock("C", "environment", "Classroom environment", "Organised, safe and stimulating environment", 5)}
+      <div style="background:var(--color-background-secondary);padding:10px 12px;border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-secondary)">
+        Section C score: <strong style="color:#0F6E56">${score(state.C)} / 20</strong>
+      </div>
+    </div>
+    ${navButtons()}`;
+  }
+
+  function renderD() {
+    renderDots();
+    document.getElementById("form-body").innerHTML = `
+    <div class="content">
+      ${ratingBlock("D", "evaluation", "Lesson evaluation", "Teacher assesses learning at end of lesson", 5)}
+      ${ratingBlock("D", "time_mgmt", "Time management", "Lesson paced well within allocated time", 5)}
+      <div style="background:var(--color-background-secondary);padding:10px 12px;border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-secondary)">
+        Section D score: <strong style="color:#0F6E56">${score(state.D)} / 10</strong>
+      </div>
+    </div>
+    ${navButtons()}`;
+  }
+
+  function renderComments() {
+    renderDots();
+    document.getElementById("form-body").innerHTML = `
+    <div class="content">
+      <div class="field-group">
+        <div class="field-label">Observer's Comments</div>
+        <textarea class="comments-area" placeholder="General observations about the lesson..." oninput="state.comments=this.value">${state.comments}</textarea>
+      </div>
+      <div class="field-group">
+        <div class="field-label">Areas for Improvement</div>
+        <textarea class="comments-area" placeholder="Specific areas the teacher should work on..." oninput="state.areas=this.value">${state.areas}</textarea>
+      </div>
+    </div>
+    ${navButtons()}`;
+  }
+
+  function renderReview() {
+    renderDots();
+    const total = totalScore();
+    const g = grade(total);
+    const sections = [
+      { label: "A. Planning & Prep", score: score(state.A), max: 15 },
+      { label: "B. Instructional", score: score(state.B), max: 55 },
+      { label: "C. Class Mgmt", score: score(state.C), max: 20 },
+      { label: "D. Assessment", score: score(state.D), max: 10 },
+    ];
+    document.getElementById("form-body").innerHTML = `
+    <div class="content">
+      <div class="grade-badge" style="background:${g.bg}">
+        <div class="grade-val" style="color:${g.c}">${total}<span style="font-size:16px">/100</span></div>
+        <div class="grade-label" style="color:${g.c}">${g.g}</div>
+      </div>
+      <div class="score-summary">
+        ${sections.map(s => `<div class="score-card"><div class="score-card-val">${s.score}/${s.max}</div><div class="score-card-label">${s.label}</div></div>`).join("")}
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;margin-bottom:12px;font-size:13px">
+        <div style="color:var(--color-text-secondary);margin-bottom:4px">Teacher</div>
+        <div style="font-weight:500">${state.teacher || "—"} &middot; ${state.school || "—"}</div>
+        <div style="color:var(--color-text-secondary);margin-top:6px;margin-bottom:4px">Class &amp; Subject</div>
+        <div style="font-weight:500">${state.cls || "—"} &middot; ${state.subject || "—"}</div>
+        <div style="color:var(--color-text-secondary);margin-top:6px;margin-bottom:4px">Date &amp; Time</div>
+        <div style="font-weight:500">${state.date || "—"} &nbsp; ${state.start || ""} – ${state.end || ""}</div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn-back" onclick="goBack()">Back</button>
+      <button class="btn-next" onclick="submitForm()">Submit Observation</button>
+    </div>`;
+  }
+
+  function renderSubmitted() {
+    document.getElementById("dots").innerHTML = "";
+    document.getElementById("slabel").textContent = "";
+    document.getElementById("pbar").style.width = "100%";
+    const total = totalScore();
+    const g = grade(total);
+    document.getElementById("form-body").innerHTML = `
+    <div class="submitted">
+      <div class="check-circle"><i class="ti ti-check" style="font-size:28px"></i></div>
+      <div class="sub-title">Observation Submitted</div>
+      <div class="sub-sub">The observation for <strong>${state.teacher || "the teacher"}</strong> at <strong>${state.school || "the school"}</strong> has been recorded with a score of <strong>${total}/100</strong> (${g.g}).</div>
+      <button class="new-btn" onclick="resetForm()">Start New Observation</button>
+    </div>`;
+  }
+
+  function goNext() {
+    if (state.step < steps.length - 1) { state.step++; steps[state.step].render(); }
+  }
+  function goBack() {
+    if (state.step > 0) { state.step--; steps[state.step].render(); }
+  }
+  function submitForm() { renderSubmitted(); }
+  function resetForm() {
+    Object.assign(state, {
+      step: 0, school: "", teacher: "", sex: "", subject: "", cls: "", roll: "", date: "", start: "", end: "",
+      A: { plan_align: 0, indicators: 0, rpk: 0 },
+      B: { intro: 0, clarity: 0, strategy: 0, motivation: 0, structure: 0, mastery: 0, questioning: 0, gender: 0, tlr: 0, critical: 0, involvement: 0 },
+      C: { rapport: 0, appearance: 0, output: 0, environment: 0 },
+      D: { evaluation: 0, time_mgmt: 0 },
+      comments: "", areas: ""
+    });
+    renderBasic();
+  }
+
+  renderBasic();
+</script>
