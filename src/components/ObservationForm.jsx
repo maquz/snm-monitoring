@@ -200,49 +200,50 @@ const ObservationForm = () => {
             <title>Observation Report — ${formData.teacher}</title>
             <style>
               * { box-sizing: border-box; margin: 0; padding: 0; }
-              body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; padding: 28px 32px; font-size: 13px; }
-              .header { display: flex; align-items: center; gap: 16px; border-bottom: 2.5px solid #0F6E56; padding-bottom: 14px; margin-bottom: 20px; }
-              .header img { width: 56px; height: 56px; object-fit: contain; }
-              .header h1 { font-size: 17px; color: #0F6E56; font-weight: 700; margin-bottom: 3px; }
-              .header p { font-size: 11px; color: #555; }
-              .grade-block { text-align: center; padding: 16px; border-radius: 10px; margin-bottom: 18px; background: ${g.bg}; }
-              .grade-num { font-size: 44px; font-weight: 700; color: ${g.c}; line-height: 1; }
-              .grade-num span { font-size: 20px; }
-              .grade-text { font-size: 16px; color: ${g.c}; font-weight: 600; margin-top: 4px; }
-              .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
-              .info-box { border: 1px solid #ddd; border-radius: 8px; padding: 10px 12px; }
-              .info-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
-              .info-value { font-size: 13px; font-weight: 600; color: #1a1a1a; }
-              .scores-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }
-              .score-box { border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center; }
-              .score-val { font-size: 20px; font-weight: 700; color: #0F6E56; }
-              .score-lbl { font-size: 10px; color: #666; margin-top: 3px; text-transform: uppercase; }
-              h2 { font-size: 12px; font-weight: 700; color: #0F6E56; text-transform: uppercase; letter-spacing: 0.06em; border-left: 3px solid #0F6E56; padding-left: 8px; margin: 16px 0 8px; }
-              table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 12px; }
-              thead tr { background: #0F6E56; color: #fff; }
-              th { padding: 7px 10px; text-align: left; font-size: 11px; font-weight: 600; }
-              td { padding: 6px 10px; border-bottom: 0.5px solid #eee; }
-              tr:nth-child(even) td { background: #f9f9f9; }
-              .rating-dots { display: flex; gap: 3px; }
-              .dot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid #ccc; display: inline-block; }
-              .dot.filled { background: #0F6E56; border-color: #0F6E56; }
-              .comment-box { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 10px; min-height: 60px; font-size: 12px; color: #333; }
-              .footer { margin-top: 24px; padding-top: 10px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size: 10px; color: #888; }
+              body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; padding: 32px 40px; font-size: 13px; max-width: 860px; margin: 0 auto; }
+
+              /* Header */
+              .header { border-bottom: 2.5px solid #0F6E56; padding-bottom: 14px; margin-bottom: 24px; }
+              .header h1 { font-size: 20px; color: #0F6E56; font-weight: 700; margin-bottom: 4px; }
+              .header p { font-size: 12px; color: #555; margin-top: 2px; }
+
+              /* Grade block */
+              .grade-block { text-align: center; padding: 28px 16px; border-radius: 12px; margin-bottom: 24px; background: ${g.bg}; }
+              .grade-num { font-size: 52px; font-weight: 700; color: ${g.c}; line-height: 1; display: inline; }
+              .grade-denom { font-size: 22px; color: ${g.c}; font-weight: 400; }
+              .grade-text { font-size: 18px; color: ${g.c}; font-weight: 600; margin-top: 8px; }
+
+              /* Info grid */
+              .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+              .info-box { border: 1px solid #ddd; border-radius: 8px; padding: 10px 14px; }
+              .info-label { font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+              .info-value { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+
+              /* Section scores */
+              .scores-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+              .score-box { border: 1px solid #ddd; border-radius: 8px; padding: 14px 10px; text-align: center; }
+              .score-val { font-size: 22px; font-weight: 700; color: #0F6E56; }
+              .score-lbl { font-size: 10px; color: #666; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+              /* Comments */
+              .section-heading { font-size: 12px; font-weight: 700; color: #0F6E56; text-transform: uppercase; letter-spacing: 0.06em; border-left: 3px solid #0F6E56; padding-left: 8px; margin: 20px 0 8px; }
+              .comment-box { border: 1px solid #ddd; border-radius: 8px; padding: 14px; min-height: 70px; font-size: 13px; color: #333; line-height: 1.6; margin-bottom: 12px; }
+
+              /* Footer */
+              .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size: 10px; color: #aaa; }
+
               @media print { @page { size: A4 portrait; margin: 15mm; } body { padding: 0; } }
             </style>
           </head>
           <body>
             <div class="header">
-              <img src="${window.location.origin}/src/assets/logo.png" onerror="this.style.display='none'" alt="GES Logo" />
-              <div>
-                <h1>Lesson Observation Report</h1>
-                <p>Ghana Education Service &mdash; Tema Metropolis</p>
-                <p>Date of Visit: ${formData.date} &nbsp;&bull;&nbsp; Time: ${formData.start} &ndash; ${formData.end}</p>
-              </div>
+              <h1>Lesson Observation Report</h1>
+              <p>Ghana Education Service &mdash; Tema Metropolis</p>
+              <p>Date of Visit: ${formData.date} &bull; Time: ${formData.start} &ndash; ${formData.end}</p>
             </div>
 
             <div class="grade-block">
-              <div class="grade-num">${total}<span>/100</span></div>
+              <span class="grade-num">${total}</span><span class="grade-denom">/100</span>
               <div class="grade-text">${g.g}</div>
             </div>
 
@@ -264,28 +265,10 @@ const ObservationForm = () => {
               <div class="score-box"><div class="score-val">${score(formData.D)}/10</div><div class="score-lbl">D. Assessment</div></div>
             </div>
 
-            ${['A','B','C','D'].map(sec => {
-              const labels = { A: 'Section A — Planning & Preparation (Max: 15)', B: 'Section B — Instructional Skills (Max: 55)', C: 'Section C — Class Management (Max: 20)', D: 'Section D — Assessment (Max: 10)' };
-              const items = sectionDetails[sec];
-              return `
-                <h2>${labels[sec]}</h2>
-                <table>
-                  <thead><tr><th>Indicator</th><th>Rating (1–5)</th><th>Score</th></tr></thead>
-                  <tbody>
-                    ${items.map(item => {
-                      const val = formData[sec][item.key] || 0;
-                      const dots = Array.from({length:5}, (_,i) => `<span class="dot ${i < val ? 'filled' : ''}"></span>`).join('');
-                      return `<tr><td>${item.label}</td><td><div class="rating-dots">${dots}</div></td><td><strong>${val}</strong>/5</td></tr>`;
-                    }).join('')}
-                  </tbody>
-                </table>
-              `;
-            }).join('')}
-
-            <h2>Observer's Comments</h2>
+            <div class="section-heading">Observer's Comments</div>
             <div class="comment-box">${formData.comments || 'No comments recorded.'}</div>
 
-            <h2>Areas for Improvement</h2>
+            <div class="section-heading">Areas for Improvement</div>
             <div class="comment-box">${formData.areas || 'None specified.'}</div>
 
             <div class="footer">
