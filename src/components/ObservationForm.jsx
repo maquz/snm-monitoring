@@ -437,7 +437,58 @@ const ObservationForm = () => {
           <>
             <div className="field-group">
               <div className="field-label">School Name <span style={{ color: '#A32D2D' }}>*</span></div>
-              <input required className="field-input" value={formData.school} onChange={e => setFormData({ ...formData, school: e.target.value })} placeholder="e.g. Tema Methodist JHS" />
+              <select required className="field-input" value={formData.school} onChange={e => setFormData({ ...formData, school: e.target.value })}>
+                <option value="">— Select School —</option>
+                <option>ADJETEY ANSAH JHS</option>
+                <option>AKODZO JHS</option>
+                <option>ARCHBISHOP ANDOH R/C BASIC</option>
+                <option>COMMUNITY 1 PRESBY PRIMARY</option>
+                <option>COMMUNITY 11 COMPLEX JHS</option>
+                <option>COMMUNITY 11 COMPLEX PRIM B&amp;KG</option>
+                <option>COMMUNITY 11 COMPLEX PRIMARY 'A' &amp; KG</option>
+                <option>COMMUNITY 4 NO 2 PRIMARY/KG</option>
+                <option>COMMUNITY 7 N0 1 BASIC</option>
+                <option>COMMUNITY 7 NO 2 JHS</option>
+                <option>COMMUNITY 7 NO. 2 PRIMARY</option>
+                <option>COMMUNITY 8 NO 3 JHS</option>
+                <option>COMMUNITY 8 NO 4 JHS</option>
+                <option>COMMUNITY 8 NO.1 PRIMARY SCHOOL</option>
+                <option>COMMUNITY 8 NO.4 PRIMARY</option>
+                <option>COMMUNITY 8/1 JHS</option>
+                <option>COMMUNITY 8/3 PRIMARY</option>
+                <option>LORENZ WOLF JHS</option>
+                <option>MANHEAN ANGLICAN 'A&amp;B' PRIMARY</option>
+                <option>MANHEAN ANGLICAN 'D' PRIMARY</option>
+                <option>MANHEAN ANGLICAN JHS</option>
+                <option>MANHEAN ANGLICAN PRIMARY 'C'</option>
+                <option>MANHEAN COMMUNITY PRIMARY</option>
+                <option>MANHEAN METHODIST BASIC SCH</option>
+                <option>MANHEAN PRESBY PRIMARY 'A'</option>
+                <option>MANHEAN S.D.A. BASIC SCHOOL</option>
+                <option>MANHEAN T.M.A 'B' PRIMARY</option>
+                <option>MANHEAN TMA '1' JHS</option>
+                <option>MANHEAN TMA 2 JHS</option>
+                <option>MANHEAN TMA A PRIMARY</option>
+                <option>NAVAL BASE JHS</option>
+                <option>NAVAL BASE KG</option>
+                <option>NAVAL BASE PRIMARY SCHOOL</option>
+                <option>NAYLOR SDA JHS</option>
+                <option>ONINKU DRIVE 1 JHS</option>
+                <option>ONINKU DRIVE '2' JHS</option>
+                <option>ONINKU DRIVE PRIMARY</option>
+                <option>PADMORE STREET PRIMARY</option>
+                <option>RAHMANIYYA ISLAMIC BASIC SCHOOL</option>
+                <option>REDEMPTION VALLEY BASIC</option>
+                <option>REPUBLIC ROAD JHS</option>
+                <option>REPUBLIC ROAD PRIMARY</option>
+                <option>ST PETER RC BASIC SCHOOL</option>
+                <option>ST. ALBAN ANGLICAN BASIC SCHOOL</option>
+                <option>ST. PAUL METHODIST JHS</option>
+                <option>TEMA COMMUNITY 8/2 JHS</option>
+                <option>TEMA MANHEAN PRESBYTERIAN PRIMARY B</option>
+                <option>TWEDAASE JHS</option>
+                <option>TWEDAASE PRIMARY B</option>
+              </select>
             </div>
             <div className="row2">
               <div className="field-group">
