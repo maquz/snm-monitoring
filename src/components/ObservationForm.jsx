@@ -21,7 +21,7 @@ const ObservationForm = () => {
     B: { intro: 0, clarity: 0, strategy: 0, motivation: 0, structure: 0, mastery: 0, questioning: 0, gender: 0, tlr: 0, critical: 0, involvement: 0 },
     C: { rapport: 0, appearance: 0, output: 0, environment: 0 },
     D: { evaluation: 0, time_mgmt: 0 },
-    comments: "", areas: ""
+    comments: "", areas: "", monitorName: ""
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -44,7 +44,26 @@ const ObservationForm = () => {
     }));
   };
 
+  const isStepValid = () => {
+    if (step === 0) {
+      return formData.school && formData.teacher && formData.sex && formData.subject && formData.cls && formData.roll && formData.date && formData.start && formData.end;
+    }
+    if (step >= 1 && step <= 4) {
+      const keys = ["A", "B", "C", "D"];
+      const currentSection = formData[keys[step - 1]];
+      return Object.values(currentSection).every(val => val > 0);
+    }
+    if (step === 5) {
+      return formData.comments && formData.areas && formData.monitorName;
+    }
+    return true;
+  };
+
   const handleNext = () => {
+    if (!isStepValid()) {
+      alert("Please fill in all required fields and provide ratings for all indicators before proceeding.");
+      return;
+    }
     if (step < steps.length - 1) setStep(step + 1);
   };
 
@@ -53,7 +72,11 @@ const ObservationForm = () => {
   };
 
   const handleSubmit = async () => {
-    setLoading(true);
+    if (!isStepValid()) {
+      alert("Please complete the review before submitting.");
+      setLoading(false);
+      return;
+    }
     setError(null);
     try {
       const total = totalScore();
@@ -87,7 +110,7 @@ const ObservationForm = () => {
       B: { intro: 0, clarity: 0, strategy: 0, motivation: 0, structure: 0, mastery: 0, questioning: 0, gender: 0, tlr: 0, critical: 0, involvement: 0 },
       C: { rapport: 0, appearance: 0, output: 0, environment: 0 },
       D: { evaluation: 0, time_mgmt: 0 },
-      comments: "", areas: ""
+      comments: "", areas: "", monitorName: ""
     });
     setStep(0);
     setSubmitted(false);
@@ -99,6 +122,10 @@ const ObservationForm = () => {
       <div className="rating-block" key={subkey}>
         <div className="rating-title">{title}</div>
         {desc && <div className="rating-desc">{desc}</div>}
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#666', marginBottom: '4px', padding: '0 4px' }}>
+          <span>1: Lowest</span>
+          <span>5: Highest</span>
+        </div>
         <div className="stars">
           {Array.from({ length: max }, (_, i) => {
             const n = i + 1;
@@ -126,32 +153,77 @@ const ObservationForm = () => {
   if (submitted) {
     const total = totalScore();
     const g = getGrade(total);
+    const sections = [
+      { label: "A. Planning & Prep", score: score(formData.A), max: 15 },
+      { label: "B. Instructional", score: score(formData.B), max: 55 },
+      { label: "C. Class Mgmt", score: score(formData.C), max: 20 },
+      { label: "D. Assessment", score: score(formData.D), max: 10 },
+    ];
+
     return (
-      <div className="shell">
-        <div className="topbar">
-          <img src={logo} alt="Logo" className="topbar-logo" />
-          <div>
-            <div className="topbar-title">Lesson Observation</div>
-            <div className="topbar-sub">Ghana Education Service · Tema Metro</div>
+      <div className="form-page-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '20px 12px', background: 'var(--color-background-tertiary)' }}>
+        <div className="shell" style={{ width: '100%', maxWidth: '400px' }}>
+          <div className="topbar">
+            <div>
+              <div className="topbar-title">Observation Summary</div>
+              <div className="topbar-sub">Ghana Education Service · Tema Metro</div>
+            </div>
           </div>
-        </div>
-        <div className="progress-track"><div className="progress-bar" style={{ width: '100%' }}></div></div>
-        <div className="submitted">
-          <div className="check-circle"><i className="ti ti-check" style={{ fontSize: '28px' }}></i></div>
-          <div className="sub-title">Observation Submitted</div>
-          <div className="sub-sub">
-            The observation for <strong>{formData.teacher || "the teacher"}</strong> at <strong>{formData.school || "the school"}</strong> has been recorded with a score of <strong>{total}/100</strong> ({g.g}).
+          <div className="content">
+            <div className="submitted" style={{ padding: '0 0 20px 0' }}>
+              <div className="check-circle"><i className="ti ti-check" style={{ fontSize: '28px' }}></i></div>
+              <div className="sub-title">Submission Successful</div>
+            </div>
+
+            <div className="grade-badge" style={{ background: g.bg }}>
+              <div className="grade-val" style={{ color: g.c }}>{total}<span style={{ fontSize: '16px' }}>/100</span></div>
+              <div className="grade-label" style={{ color: g.c }}>{g.g}</div>
+            </div>
+
+            <div className="score-summary">
+              {sections.map(s => (
+                <div key={s.label} className="score-card">
+                  <div className="score-card-val">{s.score}/{s.max}</div>
+                  <div className="score-card-label">{s.label}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ background: 'var(--color-background-secondary)', borderRadius: 'var(--border-radius-md)', padding: '12px', marginBottom: '12px', fontSize: '13px' }}>
+              <div style={{ color: 'var(--color-text-secondary)', marginBottom: '4px' }}>Teacher &amp; School</div>
+              <div style={{ fontWeight: 500 }}>{formData.teacher} &middot; {formData.school}</div>
+              <div style={{ color: 'var(--color-text-secondary)', marginTop: '6px', marginBottom: '4px' }}>Monitor</div>
+              <div style={{ fontWeight: 500 }}>{formData.monitorName}</div>
+              <div style={{ color: 'var(--color-text-secondary)', marginTop: '6px', marginBottom: '4px' }}>Date</div>
+              <div style={{ fontWeight: 500 }}>{formData.date}</div>
+            </div>
+
+            <div className="field-group">
+              <div className="field-label">Areas for Improvement</div>
+              <div style={{ fontSize: '13px', color: 'var(--color-text-primary)', background: 'var(--color-background-secondary)', padding: '10px', borderRadius: 'var(--border-radius-md)', border: '0.5px solid var(--color-border-tertiary)' }}>
+                {formData.areas}
+              </div>
+            </div>
+
+            <button className="new-btn" onClick={resetForm}>Start New Observation</button>
           </div>
-          <button className="new-btn" onClick={resetForm}>Start New Observation</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="shell">
+    <div className="form-page-wrapper">
+      <div className="shell">
       <style>{`
-        .shell { background: var(--color-background-primary); border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); overflow: hidden; max-width: 400px; margin: 20px auto; }
+        .form-page-wrapper { 
+          display: flex; 
+          flex: 1;
+          align-items: center; 
+          justify-content: center; 
+          padding: 20px 12px;
+        }
+        .shell { background: var(--color-background-primary); border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); overflow: hidden; width: 100%; max-width: 400px; margin: 0 auto; }
         .topbar { background: #0F6E56; padding: 10px 16px; display: flex; align-items: center; gap: 12px; }
         .topbar-logo { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
         .topbar-title { color: #E1F5EE; font-size: 15px; font-weight: 500; }
@@ -215,17 +287,17 @@ const ObservationForm = () => {
         {step === 0 && (
           <>
             <div className="field-group">
-              <div className="field-label">School Name</div>
-              <input className="field-input" value={formData.school} onChange={e => setFormData({ ...formData, school: e.target.value })} placeholder="e.g. Tema Methodist JHS" />
+              <div className="field-label">School Name <span style={{ color: '#A32D2D' }}>*</span></div>
+              <input required className="field-input" value={formData.school} onChange={e => setFormData({ ...formData, school: e.target.value })} placeholder="e.g. Tema Methodist JHS" />
             </div>
             <div className="row2">
               <div className="field-group">
-                <div className="field-label">Teacher Name</div>
-                <input className="field-input" value={formData.teacher} onChange={e => setFormData({ ...formData, teacher: e.target.value })} placeholder="Full name" />
+                <div className="field-label">Teacher Name <span style={{ color: '#A32D2D' }}>*</span></div>
+                <input required className="field-input" value={formData.teacher} onChange={e => setFormData({ ...formData, teacher: e.target.value })} placeholder="Full name" />
               </div>
               <div className="field-group">
-                <div className="field-label">Sex</div>
-                <select className="field-input" value={formData.sex} onChange={e => setFormData({ ...formData, sex: e.target.value })}>
+                <div className="field-label">Sex <span style={{ color: '#A32D2D' }}>*</span></div>
+                <select required className="field-input" value={formData.sex} onChange={e => setFormData({ ...formData, sex: e.target.value })}>
                   <option value="">Select</option>
                   <option>Male</option>
                   <option>Female</option>
@@ -234,30 +306,30 @@ const ObservationForm = () => {
             </div>
             <div className="row2">
               <div className="field-group">
-                <div className="field-label">Subject</div>
-                <input className="field-input" value={formData.subject} onChange={e => setFormData({ ...formData, subject: e.target.value })} placeholder="e.g. Mathematics" />
+                <div className="field-label">Subject <span style={{ color: '#A32D2D' }}>*</span></div>
+                <input required className="field-input" value={formData.subject} onChange={e => setFormData({ ...formData, subject: e.target.value })} placeholder="e.g. Mathematics" />
               </div>
               <div className="field-group">
-                <div className="field-label">Class</div>
-                <input className="field-input" value={formData.cls} onChange={e => setFormData({ ...formData, cls: e.target.value })} placeholder="e.g. JHS 2A" />
+                <div className="field-label">Class <span style={{ color: '#A32D2D' }}>*</span></div>
+                <input required className="field-input" value={formData.cls} onChange={e => setFormData({ ...formData, cls: e.target.value })} placeholder="e.g. JHS 2A" />
               </div>
             </div>
             <div className="field-group">
-              <div className="field-label">No. on Roll</div>
-              <input className="field-input" type="number" value={formData.roll} onChange={e => setFormData({ ...formData, roll: e.target.value })} placeholder="0" />
+              <div className="field-label">No. on Roll <span style={{ color: '#A32D2D' }}>*</span></div>
+              <input required className="field-input" type="number" value={formData.roll} onChange={e => setFormData({ ...formData, roll: e.target.value })} placeholder="0" />
             </div>
             <div className="field-group">
-              <div className="field-label">Date</div>
-              <input className="field-input" type="date" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
+              <div className="field-label">Date <span style={{ color: '#A32D2D' }}>*</span></div>
+              <input required className="field-input" type="date" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
             </div>
             <div className="row2">
               <div className="field-group">
-                <div className="field-label">Start Time</div>
-                <input className="field-input" type="time" value={formData.start} onChange={e => setFormData({ ...formData, start: e.target.value })} />
+                <div className="field-label">Start Time <span style={{ color: '#A32D2D' }}>*</span></div>
+                <input required className="field-input" type="time" value={formData.start} onChange={e => setFormData({ ...formData, start: e.target.value })} />
               </div>
               <div className="field-group">
-                <div className="field-label">End Time</div>
-                <input className="field-input" type="time" value={formData.end} onChange={e => setFormData({ ...formData, end: e.target.value })} />
+                <div className="field-label">End Time <span style={{ color: '#A32D2D' }}>*</span></div>
+                <input required className="field-input" type="time" value={formData.end} onChange={e => setFormData({ ...formData, end: e.target.value })} />
               </div>
             </div>
           </>
@@ -318,12 +390,16 @@ const ObservationForm = () => {
         {step === 5 && (
           <>
             <div className="field-group">
-              <div className="field-label">Observer's Comments</div>
-              <textarea className="comments-area" placeholder="General observations about the lesson..." value={formData.comments} onChange={e => setFormData({ ...formData, comments: e.target.value })} />
+              <div className="field-label">Observer's Comments <span style={{ color: '#A32D2D' }}>*</span></div>
+              <textarea required className="comments-area" placeholder="General observations about the lesson..." value={formData.comments} onChange={e => setFormData({ ...formData, comments: e.target.value })} />
             </div>
             <div className="field-group">
-              <div className="field-label">Areas for Improvement</div>
-              <textarea className="comments-area" placeholder="Specific areas the teacher should work on..." value={formData.areas} onChange={e => setFormData({ ...formData, areas: e.target.value })} />
+              <div className="field-label">Areas for Improvement <span style={{ color: '#A32D2D' }}>*</span></div>
+              <textarea required className="comments-area" placeholder="Specific areas the teacher should work on..." value={formData.areas} onChange={e => setFormData({ ...formData, areas: e.target.value })} />
+            </div>
+            <div className="field-group">
+              <div className="field-label">Name of Monitor <span style={{ color: '#A32D2D' }}>*</span></div>
+              <input required className="field-input" placeholder="Your full name" value={formData.monitorName} onChange={e => setFormData({ ...formData, monitorName: e.target.value })} />
             </div>
           </>
         )}
@@ -382,6 +458,7 @@ const ObservationForm = () => {
             {loading ? "Submitting..." : "Submit Observation"}
           </button>
         )}
+      </div>
       </div>
     </div>
   );
