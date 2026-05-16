@@ -7,6 +7,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [observations, setObservations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedObservation, setSelectedObservation] = useState(null);
   const printRef = useRef();
 
   useEffect(() => {
@@ -103,6 +104,85 @@ const AdminDashboard = () => {
     }, 500);
   };
 
+  const handlePrintObservation = () => {
+    if (!selectedObservation) return;
+    const o = selectedObservation;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Observation Report — ${o.teacher}</title>
+          <style>
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; padding: 32px 40px; font-size: 13px; max-width: 860px; margin: 0 auto; }
+            .header { border-bottom: 2.5px solid #0F6E56; padding-bottom: 14px; margin-bottom: 24px; }
+            .header h1 { font-size: 20px; color: #0F6E56; font-weight: 700; margin-bottom: 4px; }
+            .header p { font-size: 12px; color: #555; margin-top: 2px; }
+            .grade-block { text-align: center; padding: 28px 16px; border-radius: 12px; margin-bottom: 24px; background: ${getGradeBg(o.total_score)}; }
+            .grade-num { font-size: 52px; font-weight: 700; color: ${getGradeColor(o.total_score)}; line-height: 1; display: inline; }
+            .grade-denom { font-size: 22px; color: ${getGradeColor(o.total_score)}; font-weight: 400; }
+            .grade-text { font-size: 18px; color: ${getGradeColor(o.total_score)}; font-weight: 600; margin-top: 8px; }
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+            .info-box { border: 1px solid #ddd; border-radius: 8px; padding: 10px 14px; }
+            .info-label { font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+            .info-value { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+            .scores-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+            .score-box { border: 1px solid #ddd; border-radius: 8px; padding: 14px 10px; text-align: center; }
+            .score-val { font-size: 22px; font-weight: 700; color: #0F6E56; }
+            .score-lbl { font-size: 10px; color: #666; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
+            .section-heading { font-size: 12px; font-weight: 700; color: #0F6E56; text-transform: uppercase; letter-spacing: 0.06em; border-left: 3px solid #0F6E56; padding-left: 8px; margin: 20px 0 8px; }
+            .comment-box { border: 1px solid #ddd; border-radius: 8px; padding: 14px; min-height: 70px; font-size: 13px; color: #333; line-height: 1.6; margin-bottom: 12px; }
+            .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size: 10px; color: #aaa; }
+            @media print { @page { size: A4 portrait; margin: 15mm; } body { padding: 0; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Lesson Observation Report</h1>
+            <p>Ghana Education Service &mdash; Tema Metropolis</p>
+            <p>Date of Visit: ${o.date} &bull; Time: ${o.start || ''} &ndash; ${o.end || ''}</p>
+          </div>
+          <div class="grade-block">
+            <span class="grade-num">${o.total_score}</span><span class="grade-denom">/100</span>
+            <div class="grade-text">${o.grade}</div>
+          </div>
+          <div class="info-grid">
+            <div class="info-box"><div class="info-label">Teacher</div><div class="info-value">${o.teacher}</div></div>
+            <div class="info-box"><div class="info-label">Sex</div><div class="info-value">${o.sex || '—'}</div></div>
+            <div class="info-box"><div class="info-label">School</div><div class="info-value">${o.school}</div></div>
+            <div class="info-box"><div class="info-label">Class</div><div class="info-value">${o.cls || '—'}</div></div>
+            <div class="info-box"><div class="info-label">Subject</div><div class="info-value">${o.subject}</div></div>
+            <div class="info-box"><div class="info-label">Roll</div><div class="info-value">${o.roll || '—'}</div></div>
+            <div class="info-box"><div class="info-label">Monitor</div><div class="info-value">${o.monitorName || '—'}</div></div>
+            <div class="info-box"><div class="info-label">Date</div><div class="info-value">${o.date}</div></div>
+          </div>
+          <div class="scores-grid">
+            <div class="score-box"><div class="score-val">${o.score_a ?? '—'}/15</div><div class="score-lbl">A. Planning</div></div>
+            <div class="score-box"><div class="score-val">${o.score_b ?? '—'}/55</div><div class="score-lbl">B. Instructional</div></div>
+            <div class="score-box"><div class="score-val">${o.score_c ?? '—'}/20</div><div class="score-lbl">C. Class Mgmt</div></div>
+            <div class="score-box"><div class="score-val">${o.score_d ?? '—'}/10</div><div class="score-lbl">D. Assessment</div></div>
+          </div>
+          <div class="section-heading">Observer's Comments</div>
+          <div class="comment-box">${o.comments || 'No comments recorded.'}</div>
+          <div class="section-heading">Areas for Improvement</div>
+          <div class="comment-box">${o.areas || 'None specified.'}</div>
+          <div class="footer">
+            <span>GES Tema Metropolis &mdash; Lesson Observation Form</span>
+            <span>Monitor: ${o.monitorName || '—'}</span>
+            <span>Confidential &mdash; Official Use Only</span>
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 600);
+  };
+
   const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'schools', label: 'Schools' },
@@ -155,7 +235,22 @@ const AdminDashboard = () => {
         .donut-wrap { display: flex; align-items: center; gap: 12px; }
         .legend-item { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 12px; }
         .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-        .teacher-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+        .teacher-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 0.5px solid var(--color-border-tertiary); cursor: pointer; transition: background-color 0.2s; }
+        .teacher-row:hover { background-color: var(--color-background-secondary); }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal-content { background: var(--color-background-primary); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border-radius: var(--border-radius-lg); padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--color-border-secondary); padding-bottom: 16px; }
+        .modal-title { font-size: 18px; font-weight: 600; color: #0F6E56; margin-bottom: 4px; }
+        .modal-subtitle { font-size: 13px; color: var(--color-text-secondary); }
+        .modal-close { background: none; border: none; font-size: 24px; color: var(--color-text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; transition: background 0.2s; }
+        .modal-close:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
+        .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .report-item { background: var(--color-background-secondary); padding: 12px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); }
+        .report-label { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+        .report-val { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+        .report-section { margin-bottom: 20px; }
+        .report-section-title { font-size: 14px; font-weight: 600; color: #0F6E56; border-left: 3px solid #0F6E56; padding-left: 8px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+        .report-text { font-size: 13px; color: var(--color-text-primary); line-height: 1.5; background: var(--color-background-secondary); padding: 12px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); }
         .avatar { width: 32px; height: 32px; border-radius: 50%; background: #E1F5EE; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: #085041; flex-shrink: 0; }
         .score-pill { margin-left: auto; font-size: 12px; font-weight: 500; padding: 3px 8px; border-radius: 10px; background: #EAF3DE; color: #27500A; }
         .score-pill.low { background: #FCEBEB; color: #A32D2D; }
@@ -287,7 +382,7 @@ const AdminDashboard = () => {
                       <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>No data available.</div>
                     ) : (
                       observations.map(o => (
-                        <div className="teacher-row" key={o.id}>
+                        <div className="teacher-row" key={o.id} onClick={() => setSelectedObservation(o)}>
                           <div className="avatar">{o.teacher.split(' ').map(n => n[0]).join('')}</div>
                           <div>
                             <div className="teacher-name">{o.teacher}</div>
@@ -326,6 +421,71 @@ const AdminDashboard = () => {
           </>
         )}
       </div>
+
+      {/* Observation Report Modal */}
+      {selectedObservation && (
+        <div className="modal-overlay" onClick={() => setSelectedObservation(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <div className="modal-title">Observation Report</div>
+                <div className="modal-subtitle">{selectedObservation.teacher} &middot; {selectedObservation.school}</div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button onClick={handlePrintObservation} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-background-secondary)', border: '1px solid var(--color-border-tertiary)', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', color: 'var(--color-text-primary)' }}>
+                  <i className="ti ti-printer"></i> Print
+                </button>
+                <button className="modal-close" onClick={() => setSelectedObservation(null)}>&times;</button>
+              </div>
+            </div>
+            
+            <div className="report-grid">
+              <div className="report-item">
+                <div className="report-label">Total Score</div>
+                <div className="report-val" style={{ color: getGradeColor(selectedObservation.total_score), fontSize: '20px', fontWeight: 'bold' }}>
+                  {selectedObservation.total_score}/100
+                </div>
+              </div>
+              <div className="report-item">
+                <div className="report-label">Grade</div>
+                <div className="report-val">
+                  <span className="grade-chip" style={{ background: getGradeBg(selectedObservation.total_score), color: getGradeColor(selectedObservation.total_score), fontSize: '13px', padding: '4px 10px' }}>
+                    {selectedObservation.grade}
+                  </span>
+                </div>
+              </div>
+              <div className="report-item">
+                <div className="report-label">Date & Time</div>
+                <div className="report-val">{selectedObservation.date} &middot; {selectedObservation.start} - {selectedObservation.end}</div>
+              </div>
+              <div className="report-item">
+                <div className="report-label">Subject & Class</div>
+                <div className="report-val">{selectedObservation.subject} &middot; {selectedObservation.cls}</div>
+              </div>
+            </div>
+
+            <div className="report-section">
+              <div className="report-section-title">Section Scores</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div className="report-text" style={{ padding: '8px 12px' }}>A. Planning: <strong style={{ color: '#0F6E56' }}>{selectedObservation.score_a}/15</strong></div>
+                <div className="report-text" style={{ padding: '8px 12px' }}>B. Instructional: <strong style={{ color: '#0F6E56' }}>{selectedObservation.score_b}/55</strong></div>
+                <div className="report-text" style={{ padding: '8px 12px' }}>C. Class Mgmt: <strong style={{ color: '#0F6E56' }}>{selectedObservation.score_c}/20</strong></div>
+                <div className="report-text" style={{ padding: '8px 12px' }}>D. Assessment: <strong style={{ color: '#0F6E56' }}>{selectedObservation.score_d}/10</strong></div>
+              </div>
+            </div>
+
+            <div className="report-section">
+              <div className="report-section-title">Observer Comments</div>
+              <div className="report-text">{selectedObservation.comments || 'No comments provided.'}</div>
+            </div>
+
+            <div className="report-section">
+              <div className="report-section-title">Areas for Improvement</div>
+              <div className="report-text">{selectedObservation.areas || 'No areas for improvement specified.'}</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hidden print template — rendered into a new window */}
       <div ref={printRef} style={{ display: 'none' }}>
