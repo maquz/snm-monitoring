@@ -5,6 +5,7 @@ import { auth, db } from './lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import ObservationForm from './components/ObservationForm';
 import AdminDashboard from './components/AdminDashboard';
+import AdminPanel from './components/AdminPanel';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -57,6 +58,12 @@ function App() {
               <AdminDashboard />
             </ProtectedRoute>
           } />
+          
+          <Route path="/panel" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminPanel />
+            </ProtectedRoute>
+          } />
         </Routes>
 
         {user && (
@@ -88,19 +95,35 @@ function App() {
             </Link>
             
             {role === 'admin' && (
-              <Link to="/admin" style={{ 
-                textDecoration: 'none', 
-                color: 'var(--color-text-secondary)', 
-                fontSize: '11px', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center',
-                gap: '4px',
-                fontWeight: 500
-              }}>
-                <i className="ti ti-chart-bar" style={{ fontSize: '20px' }}></i>
-                <span>Dashboard</span>
-              </Link>
+              <>
+                <Link to="/admin" style={{ 
+                  textDecoration: 'none', 
+                  color: 'var(--color-text-secondary)', 
+                  fontSize: '11px', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontWeight: 500
+                }}>
+                  <i className="ti ti-chart-bar" style={{ fontSize: '20px' }}></i>
+                  <span>Dashboard</span>
+                </Link>
+
+                <Link to="/panel" style={{ 
+                  textDecoration: 'none', 
+                  color: 'var(--color-text-secondary)', 
+                  fontSize: '11px', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontWeight: 500
+                }}>
+                  <i className="ti ti-settings" style={{ fontSize: '20px' }}></i>
+                  <span>Panel</span>
+                </Link>
+              </>
             )}
 
             <div onClick={handleLogout} style={{ 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../lib/firebase';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
 import logo from '../assets/logo.png';
 
 const AdminDashboard = () => {
@@ -102,6 +102,18 @@ const AdminDashboard = () => {
       printWindow.print();
       printWindow.close();
     }, 500);
+  };
+
+  const handleDeleteObservation = async () => {
+    if (!selectedObservation) return;
+    if (!window.confirm("Are you sure you want to delete this observation? This action cannot be undone.")) return;
+    try {
+      await deleteDoc(doc(db, "observations", selectedObservation.id));
+      setSelectedObservation(null);
+    } catch (err) {
+      console.error("Error deleting observation:", err);
+      alert("Failed to delete observation.");
+    }
   };
 
   const handlePrintObservation = () => {
@@ -432,6 +444,9 @@ const AdminDashboard = () => {
                 <div className="modal-subtitle">{selectedObservation.teacher} &middot; {selectedObservation.school}</div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button onClick={handleDeleteObservation} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#FCEBEB', border: '1px solid #E24B4A', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', color: '#A32D2D' }}>
+                  <i className="ti ti-trash"></i> Delete
+                </button>
                 <button onClick={handlePrintObservation} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-background-secondary)', border: '1px solid var(--color-border-tertiary)', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', color: 'var(--color-text-primary)' }}>
                   <i className="ti ti-printer"></i> Print
                 </button>
