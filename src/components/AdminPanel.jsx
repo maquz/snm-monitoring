@@ -15,6 +15,7 @@ const AdminPanel = () => {
   // Schools State
   const [schools, setSchools] = useState([]);
   const [newSchool, setNewSchool] = useState('');
+  const [newCircuit, setNewCircuit] = useState('');
   const [loadingSchools, setLoadingSchools] = useState(true);
 
   // Observations State (for Export & Maintenance)
@@ -57,9 +58,9 @@ const AdminPanel = () => {
 
   const handleAddSchool = async (e) => {
     e.preventDefault();
-    if (!newSchool.trim()) return;
+    if (!newSchool.trim() || !newCircuit.trim()) return alert("Both Circuit and School names are required.");
     try {
-      await addDoc(collection(db, "schools"), { name: newSchool.trim() });
+      await addDoc(collection(db, "schools"), { name: newSchool.trim(), circuit: newCircuit.trim() });
       setNewSchool('');
     } catch (err) {
       console.error("Error adding school:", err);
@@ -218,13 +219,22 @@ const AdminPanel = () => {
               <span>Dynamic School List</span>
               <span style={{ fontSize: '12px', fontWeight: 400, color: 'var(--color-text-secondary)' }}>{schools.length} total</span>
             </div>
-            <form className="add-school-form" onSubmit={handleAddSchool}>
+            <form className="add-school-form" onSubmit={handleAddSchool} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '8px' }}>
+              <input 
+                type="text" 
+                className="school-input" 
+                placeholder="Circuit Name (e.g., North Circuit)..." 
+                value={newCircuit} 
+                onChange={e => setNewCircuit(e.target.value)} 
+                required
+              />
               <input 
                 type="text" 
                 className="school-input" 
                 placeholder="Enter new school name..." 
                 value={newSchool} 
                 onChange={e => setNewSchool(e.target.value)} 
+                required
               />
               <button type="submit" className="btn-primary">Add</button>
             </form>
@@ -236,7 +246,10 @@ const AdminPanel = () => {
               ) : (
                 schools.map(s => (
                   <div className="school-row" key={s.id}>
-                    <div className="school-name">{s.name}</div>
+                    <div>
+                      <div className="school-name">{s.name}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>Circuit: {s.circuit || 'Unassigned'}</div>
+                    </div>
                     <button className="btn-small" style={{ color: '#A32D2D' }} onClick={() => handleDeleteSchool(s.id)}>
                       <i className="ti ti-trash"></i> Delete
                     </button>

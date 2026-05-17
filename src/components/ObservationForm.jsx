@@ -17,7 +17,7 @@ const ObservationForm = () => {
   const [step, setStep] = useState(0);
   const [schools, setSchools] = useState([]);
   const [formData, setFormData] = useState({
-    school: "", teacher: "", sex: "", subject: "", cls: "", roll: "", date: "", start: "", end: "",
+    circuit: "", school: "", teacher: "", sex: "", subject: "", cls: "", roll: "", date: "", start: "", end: "",
     A: { plan_align: 0, indicators: 0, rpk: 0 },
     B: { intro: 0, clarity: 0, strategy: 0, motivation: 0, structure: 0, mastery: 0, questioning: 0, gender: 0, tlr: 0, critical: 0, involvement: 0 },
     C: { rapport: 0, appearance: 0, output: 0, environment: 0 },
@@ -31,11 +31,16 @@ const ObservationForm = () => {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "schools"), (snapshot) => {
       // Sort alphabetically by name
-      const schoolList = snapshot.docs.map(doc => doc.data().name).sort((a, b) => a.localeCompare(b));
+      const schoolList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => a.name.localeCompare(b.name));
       setSchools(schoolList);
     });
     return () => unsubscribe();
   }, []);
+
+  // Compute unique circuits from the schools list
+  const circuits = Array.from(new Set(schools.map(s => s.circuit).filter(Boolean))).sort();
+  // Filter schools based on selected circuit
+  const filteredSchools = formData.circuit ? schools.filter(s => s.circuit === formData.circuit) : [];
 
   const score = (obj) => Object.values(obj).reduce((a, b) => a + b, 0);
   const totalScore = () => score(formData.A) + score(formData.B) + score(formData.C) + score(formData.D);
@@ -429,10 +434,17 @@ const ObservationForm = () => {
         {step === 0 && (
           <>
             <div className="field-group">
+              <div className="field-label">Circuit Name <span style={{ color: '#A32D2D' }}>*</span></div>
+              <select required className="field-input" value={formData.circuit} onChange={e => setFormData({ ...formData, circuit: e.target.value, school: '' })}>
+                <option value="">— Select Circuit —</option>
+                {circuits.length > 0 ? circuits.map(c => <option key={c} value={c}>{c}</option>) : <option disabled>Loading circuits...</option>}
+              </select>
+            </div>
+            <div className="field-group">
               <div className="field-label">School Name <span style={{ color: '#A32D2D' }}>*</span></div>
-              <select required className="field-input" value={formData.school} onChange={e => setFormData({ ...formData, school: e.target.value })}>
+              <select required className="field-input" value={formData.school} disabled={!formData.circuit} onChange={e => setFormData({ ...formData, school: e.target.value })}>
                 <option value="">— Select School —</option>
-                {schools.length > 0 ? schools.map(s => <option key={s} value={s}>{s}</option>) : <option disabled>Loading schools...</option>}
+                {filteredSchools.length > 0 ? filteredSchools.map(s => <option key={s.id} value={s.name}>{s.name}</option>) : <option disabled>Select a circuit first...</option>}
               </select>
             </div>
             <div className="row2">
