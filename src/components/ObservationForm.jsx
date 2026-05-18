@@ -345,13 +345,33 @@ const ObservationForm = () => {
             </div>
 
             {/* Action buttons */}
-            <button
-              onClick={handlePrint}
-              style={{ width: '100%', padding: '11px', marginBottom: '10px', background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 'var(--border-radius-md)', fontSize: '14px', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-            >
-              <i className="ti ti-printer" style={{ fontSize: '16px' }}></i>
-              Print / Save as PDF
-            </button>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+              <button
+                onClick={handlePrint}
+                style={{ flex: 1, padding: '11px', background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 'var(--border-radius-md)', fontSize: '14px', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              >
+                <i className="ti ti-printer" style={{ fontSize: '16px' }}></i>
+                Print
+              </button>
+              <button
+                onClick={async () => {
+                  if (navigator.share) {
+                    try {
+                      await navigator.share({
+                        title: 'Observation Report',
+                        text: `Observation Report for ${formData.teacher} at ${formData.school} by ${formData.monitorName}. Score: ${total}/100. Grade: ${g.g}.`
+                      });
+                    } catch (err) { console.error('Share error:', err); }
+                  } else {
+                    alert("Web Share API is not supported in this browser.");
+                  }
+                }}
+                style={{ flex: 1, padding: '11px', background: '#1D9E75', color: '#fff', border: 'none', borderRadius: 'var(--border-radius-md)', fontSize: '14px', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              >
+                <i className="ti ti-share" style={{ fontSize: '16px' }}></i>
+                Share
+              </button>
+            </div>
             <button className="new-btn" style={{ marginTop: 0 }} onClick={resetForm}>Start New Observation</button>
           </div>
         </div>

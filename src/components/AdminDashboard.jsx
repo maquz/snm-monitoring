@@ -104,6 +104,34 @@ const AdminDashboard = () => {
     }, 500);
   };
 
+  const handleShareGlobal = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'SnM Monitoring Dashboard Summary',
+          text: `Dashboard Summary:\nTotal Records: ${stats.total}\nAverage Score: ${stats.avgScore}/100\nTotal Schools: ${stats.schools}`
+        });
+      } catch (err) { console.error('Share error:', err); }
+    } else {
+      alert("Web Share API is not supported in this browser.");
+    }
+  };
+
+  const handleShareObservation = async () => {
+    if (!selectedObservation) return;
+    if (navigator.share) {
+      try {
+        const o = selectedObservation;
+        await navigator.share({
+          title: 'Observation Report',
+          text: `Observation Report for ${o.teacher} at ${o.school} by ${o.monitorName}. Total Score: ${o.total_score}/100. Grade: ${o.grade}.`
+        });
+      } catch (err) { console.error('Share error:', err); }
+    } else {
+      alert("Web Share API is not supported in this browser.");
+    }
+  };
+
   const handleDeleteObservation = async () => {
     if (!selectedObservation) return;
     if (!window.confirm("Are you sure you want to delete this observation? This action cannot be undone.")) return;
@@ -285,6 +313,10 @@ const AdminDashboard = () => {
             <i className="ti ti-printer" style={{ fontSize: '15px' }}></i>
             Print Report
           </button>
+          <button className="print-btn" onClick={handleShareGlobal} title="Share full summary report">
+            <i className="ti ti-share" style={{ fontSize: '15px' }}></i>
+            Share
+          </button>
         </div>
       </header>
 
@@ -449,6 +481,9 @@ const AdminDashboard = () => {
                 </button>
                 <button onClick={handlePrintObservation} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-background-secondary)', border: '1px solid var(--color-border-tertiary)', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', color: 'var(--color-text-primary)' }}>
                   <i className="ti ti-printer"></i> Print
+                </button>
+                <button onClick={handleShareObservation} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-background-secondary)', border: '1px solid var(--color-border-tertiary)', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer', color: 'var(--color-text-primary)' }}>
+                  <i className="ti ti-share"></i> Share
                 </button>
                 <button className="modal-close" onClick={() => setSelectedObservation(null)}>&times;</button>
               </div>
