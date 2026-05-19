@@ -21,6 +21,10 @@ const AdminPanel = () => {
   // Observations State (for Export & Maintenance)
   const [obsCount, setObsCount] = useState(0);
 
+  // Edit Modals State
+  const [editUser, setEditUser] = useState(null);
+  const [editSchool, setEditSchool] = useState(null);
+
   useEffect(() => {
     const unsubUsers = onSnapshot(collection(db, "users"), (snapshot) => {
       setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -75,6 +79,36 @@ const AdminPanel = () => {
     } catch (err) {
       console.error("Error deleting school:", err);
       alert("Failed to delete school.");
+    }
+  };
+
+  const handleUpdateSchool = async (e) => {
+    e.preventDefault();
+    if (!editSchool) return;
+    try {
+      await updateDoc(doc(db, "schools", editSchool.id), {
+        name: editSchool.name,
+        circuit: editSchool.circuit
+      });
+      setEditSchool(null);
+    } catch (err) {
+      console.error("Error updating school:", err);
+      alert("Failed to update school.");
+    }
+  };
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+    if (!editUser) return;
+    try {
+      await updateDoc(doc(db, "users", editUser.id), {
+        name: editUser.name,
+        role: editUser.role
+      });
+      setEditUser(null);
+    } catch (err) {
+      console.error("Error updating user:", err);
+      alert("Failed to update user.");
     }
   };
 
@@ -144,6 +178,16 @@ const AdminPanel = () => {
         .stat-box { background: var(--color-background-secondary); padding: 16px; border-radius: 8px; border: 0.5px solid var(--color-border-tertiary); text-align: center; }
         .stat-val { font-size: 24px; font-weight: 700; color: #0F6E56; }
         .stat-lbl { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; margin-top: 4px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal-content { background: var(--color-background-primary); width: 100%; max-width: 500px; border-radius: var(--border-radius-lg); padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--color-border-secondary); padding-bottom: 16px; }
+        .modal-title { font-size: 18px; font-weight: 600; color: #0F6E56; margin-bottom: 4px; }
+        .modal-subtitle { font-size: 13px; color: var(--color-text-secondary); }
+        .modal-close { background: none; border: none; font-size: 24px; color: var(--color-text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; transition: background 0.2s; }
+        .modal-close:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
+        .field-group { margin-bottom: 16px; }
+        .field-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--color-text-secondary); }
+        .field-input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--color-border-tertiary); font-size: 14px; outline: none; background: var(--color-background-primary); color: var(--color-text-primary); }
       `}</style>
 
       <header className="topbar">
@@ -194,6 +238,9 @@ const AdminPanel = () => {
                       </div>
                     </div>
                     <div className="actions">
+                      <button className="btn-small" onClick={() => setEditUser(u)} title="Edit User">
+                        <i className="ti ti-pencil"></i> Edit
+                      </button>
                       <button className="btn-small" onClick={() => handlePasswordReset(u.email)} title="Send Password Reset Email">
                         <i className="ti ti-mail"></i> Reset Pwd
                       </button>
@@ -250,9 +297,14 @@ const AdminPanel = () => {
                       <div className="school-name">{s.name}</div>
                       <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>Circuit: {s.circuit || 'Unassigned'}</div>
                     </div>
-                    <button className="btn-small" style={{ color: '#A32D2D' }} onClick={() => handleDeleteSchool(s.id)}>
-                      <i className="ti ti-trash"></i> Delete
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button className="btn-small" onClick={() => setEditSchool(s)}>
+                        <i className="ti ti-pencil"></i> Edit
+                      </button>
+                      <button className="btn-small" style={{ color: '#A32D2D' }} onClick={() => handleDeleteSchool(s.id)}>
+                        <i className="ti ti-trash"></i> Delete
+                      </button>
+                    </div>
                   </div>
                 ))
               )}
@@ -286,6 +338,67 @@ const AdminPanel = () => {
           </div>
         )}
       </div>
+
+      {/* Edit User Modal */}
+      {editUser && (
+        <div className="modal-overlay" onClick={() => setEditUser(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <div className="modal-title">Edit User</div>
+                <div className="modal-subtitle">{editUser.email}</div>
+              </div>
+              <button className="modal-close" onClick={() => setEditUser(null)}>&times;</button>
+            </div>
+            <form onSubmit={handleUpdateUser}>
+              <div className="field-group">
+                <label className="field-label">Name</label>
+                <input type="text" className="field-input" value={editUser.name || ''} onChange={(e) => setEditUser({...editUser, name: e.target.value})} required />
+              </div>
+              <div className="field-group">
+                <label className="field-label">Role</label>
+                <select className="field-input" value={editUser.role || 'observer'} onChange={(e) => setEditUser({...editUser, role: e.target.value})}>
+                  <option value="observer">Observer</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
+                <button type="button" onClick={() => setEditUser(null)} className="btn-small" style={{ padding: '10px 16px', fontSize: '13px' }}>Cancel</button>
+                <button type="submit" className="btn-primary">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit School Modal */}
+      {editSchool && (
+        <div className="modal-overlay" onClick={() => setEditSchool(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <div className="modal-title">Edit School</div>
+                <div className="modal-subtitle">Update school details</div>
+              </div>
+              <button className="modal-close" onClick={() => setEditSchool(null)}>&times;</button>
+            </div>
+            <form onSubmit={handleUpdateSchool}>
+              <div className="field-group">
+                <label className="field-label">School Name</label>
+                <input type="text" className="field-input" value={editSchool.name || ''} onChange={(e) => setEditSchool({...editSchool, name: e.target.value})} required />
+              </div>
+              <div className="field-group">
+                <label className="field-label">Circuit Name</label>
+                <input type="text" className="field-input" value={editSchool.circuit || ''} onChange={(e) => setEditSchool({...editSchool, circuit: e.target.value})} required />
+              </div>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
+                <button type="button" onClick={() => setEditSchool(null)} className="btn-small" style={{ padding: '10px 16px', fontSize: '13px' }}>Cancel</button>
+                <button type="submit" className="btn-primary">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
