@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import logo from '../assets/logo.png';
+import { generateAndSharePDF } from '../utils/pdfGenerator';
 
 const steps = [
   { label: "Basic Info" },
@@ -355,16 +356,7 @@ const ObservationForm = () => {
               </button>
               <button
                 onClick={async () => {
-                  if (navigator.share) {
-                    try {
-                      await navigator.share({
-                        title: 'Observation Report',
-                        text: `Observation Report for ${formData.teacher} at ${formData.school} by ${formData.monitorName}. Score: ${total}/100. Grade: ${g.g}.`
-                      });
-                    } catch (err) { console.error('Share error:', err); }
-                  } else {
-                    alert("Web Share API is not supported in this browser.");
-                  }
+                  await generateAndSharePDF(formData, total, g, score);
                 }}
                 style={{ flex: 1, padding: '11px', background: '#1D9E75', color: '#fff', border: 'none', borderRadius: 'var(--border-radius-md)', fontSize: '14px', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               >

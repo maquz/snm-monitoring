@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../lib/firebase';
-import { collection, onSnapshot, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import logo from '../assets/logo.png';
+import { generateAndShareObservationPDF } from '../utils/pdfGenerator';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [observations, setObservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedObservation, setSelectedObservation] = useState(null);
+  const [editObservation, setEditObservation] = useState(null);
   const printRef = useRef();
 
   useEffect(() => {
@@ -119,16 +121,26 @@ const AdminDashboard = () => {
 
   const handleShareObservation = async () => {
     if (!selectedObservation) return;
-    if (navigator.share) {
-      try {
-        const o = selectedObservation;
-        await navigator.share({
-          title: 'Observation Report',
-          text: `Observation Report for ${o.teacher} at ${o.school} by ${o.monitorName}. Total Score: ${o.total_score}/100. Grade: ${o.grade}.`
-        });
-      } catch (err) { console.error('Share error:', err); }
-    } else {
-      alert("Web Share API is not supported in this browser.");
+    await generateAndShareObservationPDF(selectedObservation);
+  };
+
+  const handleUpdateObservation = async (e) => {
+    e.preventDefault();
+    if (!editObservation) return;
+    try {
+      const docRef = doc(db, "observations", editObservation.id);
+      await updateDoc(docRef, {
+        teacher: editObservation.teacher,
+        school: editObservation.school,
+        subject: editObservation.subject,
+        comments: editObservation.comments,
+        areas: editObservation.areas
+      });
+      setEditObservation(null);
+      alert("Observation updated successfully!");
+    } catch (err) {
+      console.error("Error updating observation:", err);
+      alert("Failed to update observation.");
     }
   };
 
@@ -403,11 +415,16 @@ const AdminDashboard = () => {
                             <div className="school-name">{o.school}</div>
                             <div className="school-meta">{o.subject} &middot; {o.teacher}</div>
                           </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <div className={`grade-chip ${o.total_score >= 80 ? 'chip-ex' : o.total_score >= 65 ? 'chip-vg' : o.total_score >= 50 ? 'chip-gd' : 'chip-ni'}`}>
-                              {o.grade}
+                          <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div>
+                              <div className={`grade-chip ${o.total_score >= 80 ? 'chip-ex' : o.total_score >= 65 ? 'chip-vg' : o.total_score >= 50 ? 'chip-gd' : 'chip-ni'}`}>
+                                {o.grade}
+                              </div>
+                              <div style={{ fontSize: '12px', color: '#0F6E56', marginTop: '3px', fontWeight: 500 }}>{o.total_score}/100</div>
                             </div>
-                            <div style={{ fontSize: '12px', color: '#0F6E56', marginTop: '3px', fontWeight: 500 }}>{o.total_score}/100</div>
+                            <button onClick={(e) => { e.stopPropagation(); setEditObservation(o); }} style={{ background: '#E8F6F1', border: '1px solid #5DCAA5', color: '#0F6E56', cursor: 'pointer', padding: '6px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <i className="ti ti-pencil"></i>
+                            </button>
                           </div>
                         </div>
                       ))
@@ -428,12 +445,17 @@ const AdminDashboard = () => {
                       observations.map(o => (
                         <div className="teacher-row" key={o.id} onClick={() => setSelectedObservation(o)}>
                           <div className="avatar">{o.teacher.split(' ').map(n => n[0]).join('')}</div>
-                          <div>
+                          <div style={{ flex: 1 }}>
                             <div className="teacher-name">{o.teacher}</div>
                             <div className="teacher-school">{o.school} &middot; {o.subject}</div>
                           </div>
-                          <div className={`score-pill ${o.total_score < 50 ? 'low' : o.total_score < 65 ? 'med' : ''}`}>
-                            {o.total_score}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div className={`score-pill ${o.total_score < 50 ? 'low' : o.total_score < 65 ? 'med' : ''}`}>
+                              {o.total_score}
+                            </div>
+                            <button onClick={(e) => { e.stopPropagation(); setEditObservation(o); }} style={{ background: '#E8F6F1', border: '1px solid #5DCAA5', color: '#0F6E56', cursor: 'pointer', padding: '4px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <i className="ti ti-pencil"></i>
+                            </button>
                           </div>
                         </div>
                       ))
@@ -609,6 +631,47 @@ const AdminDashboard = () => {
           <span>Generated: {now}</span>
         </div>
       </div>
+
+      {/* Edit Observation Modal */}
+      {editObservation && (
+        <div className="modal-overlay" onClick={() => setEditObservation(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <div className="modal-title">Edit Observation</div>
+                <div className="modal-subtitle">Update basic details</div>
+              </div>
+              <button className="modal-close" onClick={() => setEditObservation(null)}>&times;</button>
+            </div>
+            <form onSubmit={handleUpdateObservation} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="field-group">
+                <label className="field-label" style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500, color: 'var(--color-text-secondary)' }}>Teacher Name</label>
+                <input type="text" value={editObservation.teacher} onChange={(e) => setEditObservation({...editObservation, teacher: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border-tertiary)', fontSize: '14px' }} required />
+              </div>
+              <div className="field-group">
+                <label className="field-label" style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500, color: 'var(--color-text-secondary)' }}>School</label>
+                <input type="text" value={editObservation.school} onChange={(e) => setEditObservation({...editObservation, school: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border-tertiary)', fontSize: '14px' }} required />
+              </div>
+              <div className="field-group">
+                <label className="field-label" style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500, color: 'var(--color-text-secondary)' }}>Subject</label>
+                <input type="text" value={editObservation.subject} onChange={(e) => setEditObservation({...editObservation, subject: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border-tertiary)', fontSize: '14px' }} required />
+              </div>
+              <div className="field-group">
+                <label className="field-label" style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500, color: 'var(--color-text-secondary)' }}>Comments</label>
+                <textarea value={editObservation.comments} onChange={(e) => setEditObservation({...editObservation, comments: e.target.value})} rows="3" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border-tertiary)', fontSize: '14px', resize: 'vertical' }}></textarea>
+              </div>
+              <div className="field-group">
+                <label className="field-label" style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500, color: 'var(--color-text-secondary)' }}>Areas for Improvement</label>
+                <textarea value={editObservation.areas} onChange={(e) => setEditObservation({...editObservation, areas: e.target.value})} rows="3" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border-tertiary)', fontSize: '14px', resize: 'vertical' }}></textarea>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                <button type="button" onClick={() => setEditObservation(null)} style={{ padding: '10px 16px', background: 'transparent', border: '1px solid var(--color-border-tertiary)', borderRadius: '8px', color: 'var(--color-text-secondary)', cursor: 'pointer', fontWeight: 500 }}>Cancel</button>
+                <button type="submit" style={{ padding: '10px 16px', background: '#0F6E56', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 500, cursor: 'pointer' }}>Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
