@@ -44,7 +44,7 @@ export const generateAndSharePDF = async (formData, total, g, score) => {
 
     const opt = {
       margin: 0.3,
-      filename: \`Observation_\${formData.teacher.replace(/\\s+/g, '_')}_\${formData.date}.pdf\`,
+      filename: `Observation_${formData.teacher.replace(/\s+/g, '_')}_${formData.date}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
@@ -56,7 +56,7 @@ export const generateAndSharePDF = async (formData, total, g, score) => {
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         title: 'Observation Report',
-        text: \`Observation Report for \${formData.teacher}\`,
+        text: `Observation Report for ${formData.teacher}`,
         files: [file],
       });
     } else {
@@ -123,7 +123,7 @@ export const generateAndShareObservationPDF = async (o) => {
 
     const opt = {
       margin: 0.3,
-      filename: \`Observation_\${o.teacher.replace(/\\s+/g, '_')}_\${o.date}.pdf\`,
+      filename: `Observation_${o.teacher.replace(/\s+/g, '_')}_${o.date}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
@@ -135,7 +135,7 @@ export const generateAndShareObservationPDF = async (o) => {
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         title: 'Observation Report',
-        text: \`Observation Report for \${o.teacher}\`,
+        text: `Observation Report for ${o.teacher}`,
         files: [file],
       });
     } else {
