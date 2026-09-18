@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth, db } from '../lib/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { useNavigate, Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
@@ -36,6 +36,22 @@ const LoginPage = () => {
     } catch (err) {
       console.error("Login error:", err);
       setError("Invalid email or password. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError("Please enter your email address first to reset your password.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setError("Password reset email sent! Check your inbox.");
+    } catch (err) {
+      console.error("Reset error:", err);
+      setError("Failed to send reset email. Ensure your email is correct.");
     } finally {
       setLoading(false);
     }
@@ -179,7 +195,16 @@ const LoginPage = () => {
             />
           </div>
           <div className="input-group">
-            <label className="input-label">Password</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <label className="input-label" style={{ marginBottom: 0 }}>Password</label>
+              <button 
+                type="button" 
+                onClick={handleForgotPassword}
+                style={{ background: 'none', border: 'none', color: '#0F6E56', fontSize: '11px', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+              >
+                Forgot?
+              </button>
+            </div>
             <input 
               type="password" 
               className="login-input" 
