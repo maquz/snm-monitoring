@@ -130,6 +130,13 @@ const AdminPanel = () => {
     downloadCSV(header + csv, 'observations_export.csv');
   };
 
+  const exportSchoolsCSV = () => {
+    if (schools.length === 0) return alert("No schools to export.");
+    const header = "ID,Name,Circuit\n";
+    const csv = schools.map(s => `"${s.id}","${s.name || ''}","${s.circuit || ''}"`).join('\n');
+    downloadCSV(header + csv, 'schools_export.csv');
+  };
+
   const downloadCSV = (csvContent, fileName) => {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
@@ -333,6 +340,9 @@ const AdminPanel = () => {
               </button>
               <button className="btn-primary" style={{ justifyContent: 'center', background: '#085041' }} onClick={exportObsCSV}>
                 <i className="ti ti-download"></i> Export Observations (CSV)
+              </button>
+              <button className="btn-primary" style={{ justifyContent: 'center', background: '#0F6E56' }} onClick={exportSchoolsCSV}>
+                <i className="ti ti-download"></i> Export Schools (CSV)
               </button>
             </div>
           </div>

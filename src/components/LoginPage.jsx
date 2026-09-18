@@ -39,6 +39,8 @@ const LoginPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
   const handleForgotPassword = async () => {
     if (!email) {
       setError("Please enter your email address first to reset your password.");
